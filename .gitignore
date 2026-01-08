@@ -1,0 +1,33 @@
+# PHP
+*.log
+*.tmp
+.env
+config.local.php
+
+# Database credentials (backup before deploy)
+# includes/DatabaseConnection.php
+
+# Email config (backup before deploy)
+# mail/email_config.php
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Git
+.git/
+.gitattributes
+
+# Documentation (optional to exclude)
+# DEPLOY_GUIDE.md
