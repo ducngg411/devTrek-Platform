@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 include 'includes/DatabaseConnection.php';
 include 'includes/DatabaseFunctions.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $title   = $_POST['title'];
+    $title = $_POST['title'];
     $content = $_POST['content'];
     $code = $_POST['code'];
     $mem_id = $_POST['mem_id'];
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         // Insert new questions into 'questions' table 
         $stmt->execute();
-        
+
         // Increment question count in modules table (replaces TRIGGER)
         incrementModuleQuestionCount($pdo, $modules_id);
         exit();
