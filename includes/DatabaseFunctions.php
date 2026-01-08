@@ -132,18 +132,23 @@ function deleteQuestion($pdo, $id, $member) {
     session_start();
 
     // Truy vấn để lấy thông tin câu hỏi và người tạo câu hỏi
-    $stmt = $pdo->prepare('SELECT mem_id FROM questions WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT mem_id, modules_id FROM questions WHERE id = ?');
     $stmt->execute([$id]);
     $question = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Kiểm tra nếu người dùng là người tạo câu hỏi hoặc là quản trị viên
     if ($question && ($question['mem_id'] == $member['mem_id'] || $member['role'] == 'admin')) {
         try {
+            $modules_id = $question['modules_id'];
+            
             $sql = "DELETE FROM questions WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             
             if ($stmt->execute()) {
+                // Decrement question count (replaces TRIGGER)
+                decrementModuleQuestionCount($pdo, $modules_id);
+                
                 // Đặt thông báo thành công
                 $_SESSION['message'] = array("text" => "Question successfully deleted.", "alert" => "info");
             } else {
@@ -156,7 +161,58 @@ function deleteQuestion($pdo, $id, $member) {
         $_SESSION['message'] = array("text" => "You are not authorized to delete this question.", "alert" => "danger");
     }
 }
-?>
 
+// ============================================
+// HELPER FUNCTIONS FOR QUESTION COUNT MANAGEMENT
+// (Replaces MySQL TRIGGERs for hosting compatibility)
+// ============================================
 
+/**
+ * Increment question count for a module
+ * Called after inserting a new question
+ */
+function incrementModuleQuestionCount($pdo, $modules_id) {
+    try {
+        $sql = "UPDATE modules SET questions_count = questions_count + 1 WHERE modules_id = :modules_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':modules_id', $modules_id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error incrementing question count: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Decrement question count for a module
+ * Called after deleting a question
+ */
+function decrementModuleQuestionCount($pdo, $modules_id) {
+    try {
+        $sql = "UPDATE modules SET questions_count = GREATEST(questions_count - 1, 0) WHERE modules_id = :modules_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':modules_id', $modules_id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error decrementing question count: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Update question counts when moving a question to a different module
+ * Called after updating a question's module_id
+ */
+function updateModuleQuestionCounts($pdo, $old_modules_id, $new_modules_id) {
+    try {
+        if ($old_modules_id != $new_modules_id) {
+            decrementModuleQuestionCount($pdo, $old_modules_id);
+            incrementModuleQuestionCount($pdo, $new_modules_id);
+        }
+        return true;
+    } catch (Exception $e) {
+        error_log("Error updating question counts: " . $e->getMessage());
+        return false;
+    }
+}
 

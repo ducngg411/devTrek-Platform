@@ -4,12 +4,6 @@
 .env
 config.local.php
 
-# Database credentials (backup before deploy)
-# includes/DatabaseConnection.php
-
-# Email config (backup before deploy)
-# mail/email_config.php
-
 # IDE
 .vscode/
 .idea/
@@ -29,5 +23,5 @@ desktop.ini
 .git/
 .gitattributes
 
-# Documentation (optional to exclude)
-# DEPLOY_GUIDE.md
+# Railway
+.railway/

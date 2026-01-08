@@ -272,39 +272,8 @@ INSERT INTO `questions` (`id`, `title`, `content`, `code`, `image`, `image_type`
 (49, 'Advanced blockchain technologies', 'What are some advanced technologies being developed in the field of blockchain?', NULL, NULL, NULL, '2024-08-13 09:24:16', 49, 49, NULL, 0),
 (50, 'Introduction to IoT', 'What is the Internet of Things (IoT) and how does it work?', NULL, NULL, NULL, '2024-08-13 09:24:16', 50, 50, NULL, 0);
 
---
--- Triggers `questions`
---
-DELIMITER $$
-CREATE TRIGGER `after_question_delete` AFTER DELETE ON `questions` FOR EACH ROW BEGIN
-    UPDATE modules
-    SET questions_count = questions_count - 1
-    WHERE modules.modules_id = OLD.modules_id;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_question_insert` AFTER INSERT ON `questions` FOR EACH ROW BEGIN
-    UPDATE modules
-    SET questions_count = questions_count + 1
-    WHERE modules.modules_id = NEW.modules_id;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_question_update` AFTER UPDATE ON `questions` FOR EACH ROW BEGIN
-    IF NEW.modules_id <> OLD.modules_id THEN
-        UPDATE modules
-        SET questions_count = questions_count - 1
-        WHERE modules.modules_id = OLD.modules_id;
-
-        UPDATE modules
-        SET questions_count = questions_count + 1
-        WHERE modules.modules_id = NEW.modules_id;
-    END IF;
-END
-$$
-DELIMITER ;
+-- NOTE: TRIGGERs removed for compatibility with hosting platforms like Railway, InfinityFree
+-- Question count updates are handled in PHP code via DatabaseFunctions.php
 
 --
 -- Indexes for dumped tables

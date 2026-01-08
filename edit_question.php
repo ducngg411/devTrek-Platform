@@ -1,5 +1,6 @@
 <?php 
 include 'includes/DatabaseConnection.php';
+include 'includes/DatabaseFunctions.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'];
@@ -46,16 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $stmt->execute();
 
-        // Nếu modules_id thay đổi, cập nhật question_count cho modules cũ và mới
-        if ($currentModulesId != $modules_id) {
-            $stmt = $pdo->prepare("UPDATE modules SET questions_count = questions_count - 1 WHERE modules_id = ?");
-            $stmt->execute([$currentModulesId]);
-
-            $stmt = $pdo->prepare("UPDATE modules SET questions_count = questions_count + 1 WHERE modules_id = ?");
-            $stmt->execute([$modules_id]);
-        }
-
-        // Cập nhật thời gian chỉnh sửa
+        // Nếu modules_id thay đổi, cập nhật question_count (replaces TRIGGER)
+        updateModuleQuestionCounts($pdo, $currentModulesId, $modules_id);
         $stmt = $pdo->prepare("UPDATE questions SET edited_at = NOW() WHERE id = ?");
         $stmt->execute([$id]);
 

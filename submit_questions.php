@@ -1,6 +1,7 @@
 <?php 
 
 include 'includes/DatabaseConnection.php';
+include 'includes/DatabaseFunctions.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title   = $_POST['title'];
@@ -35,12 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Insert new questions into 'questions' table 
         $stmt->execute();
         
-        // Increment question count in modules table
-        $stmt = $pdo->prepare("UPDATE modules SET questions_count = questions_count + 1 WHERE modules_id = ?");
-        $stmt->execute([$modules_id]);
-        
-        echo "Your question has been posted!";
-        header('Location: templates/homelogin.html.php');
+        // Increment question count in modules table (replaces TRIGGER)
+        incrementModuleQuestionCount($pdo, $modules_id);
         exit();
     } catch (Exception $e) {
         echo "An error occurred while posting a question: " . $e->getMessage();
