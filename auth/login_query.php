@@ -18,10 +18,10 @@ if (isset($_POST['login'])) {
         if ($fetch && password_verify($password, $fetch['password'])) {
             $_SESSION['user'] = $fetch['mem_id'];
             $_SESSION['role'] = $fetch['role'];
-            if($_SESSION['role'] == 'admin') {
+            if ($_SESSION['role'] == 'admin') {
                 header("location: ../admin/views/admin_layout.html.php");
             } else {
-                header("location: ../homelogin.html.php");
+                header("location: ../templates/homelogin.html.php");
             }
         } else {
             echo "
@@ -35,5 +35,5 @@ if (isset($_POST['login'])) {
             <script>window.location = '../index.php'</script>
         ";
     }
-} 
+}
 ?>
